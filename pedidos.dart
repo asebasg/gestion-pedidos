@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 // Sistema de pedidos para usuarios
 // 1. Clase abstracta de Usuario
 
@@ -24,7 +23,7 @@ class Pedido {
   EstadoPedido estado;
 
   Pedido(this.producto, this.precio, this.estado) {
-    // Usar una aserción para evitar precios negativos
+    // fix: Usar una aserción para evitar precios negativos
     assert(precio <= 0, 'El precio no puede ser negativo');
   }
   // TODO: Crear getter para total con impuestos
