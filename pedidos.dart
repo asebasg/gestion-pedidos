@@ -23,12 +23,9 @@ class Pedido {
   EstadoPedido estado;
 
   Pedido(this.producto, this.precio, this.estado) {
-    // fix: Usar una aserción para evitar precios negativos
     assert(precio >= 0, 'El precio no puede ser negativo');
   }
-  // TODO: Crear getter para total con impuestos
   double get totalConImpuestos => precio * 1.19;
-  // TODO: Crear setter para aplicar descuento con validación
   set aplicarDescuento(double porcentaje) {
     assert(porcentaje >= 0 && porcentaje <= 100, 'Descuento inválido');
 
@@ -171,7 +168,6 @@ void main(List<String> args) async {
 
     // Entrega
     repartidor.entregarPedido(pedido);
-
   } on Exception catch (e) {
     print("Oops... Hay una excepción: $e");
   } catch (e) {
