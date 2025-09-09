@@ -24,7 +24,7 @@ class Pedido {
 
   Pedido(this.producto, this.precio, this.estado) {
     // fix: Usar una aserción para evitar precios negativos
-    assert(precio <= 0, 'El precio no puede ser negativo');
+    assert(precio >= 0, 'El precio no puede ser negativo');
   }
   // TODO: Crear getter para total con impuestos
   double get totalConImpuestos => precio * 1.19;
@@ -46,7 +46,7 @@ class Pedido {
 }
 
 // 4. Clase Cliente (extiende Usuario)
-class Cliente extends Usuario {
+class Cliente extends Usuario with Notificacion {
   List<Pedido> pedidos = [];
   Cliente(String nombre) : super(nombre);
   @override
@@ -56,6 +56,7 @@ class Cliente extends Usuario {
 
   void agregarPedido(Pedido pedido) {
     pedidos.add(pedido); // Agrega los pedidos al array
+    enviarNotificacion("Nuevo pedido agregado: ${pedido.producto}");
   }
 }
 
@@ -129,13 +130,53 @@ Stream<EstadoPedido> seguimientoPedido() async* {
 }
 
 void main(List<String> args) async {
+  print("=== Prueba del Sistema de Pedidos ===\n");
+
+  // Crear usuarios
+  Cliente cliente = Cliente("Juan Pérez");
+  Repartidor repartidor = Repartidor("Ana López");
+
+  cliente.login();
+  repartidor.login();
+
+  // Crear y validar pedido
   try {
-    Pedido pedido = Pedido("Producto X", 10000, EstadoPedido.pendiente);
-    print("precio original: ${pedido.precio}");
-    print("total con impuesto: ");
+    Pedido pedido = Pedido("Producto X", 100.0, EstadoPedido.pendiente);
+    print("Precio original: ${pedido.precio}");
+    print("Total con impuesto: ${pedido.totalConImpuestos}");
     pedido.aplicarDescuento = 30;
-    print("precio final con descuento: ");
+    print("Precio final con descuento: ${pedido.precio}");
+
+    // Agregar pedido al cliente
+    cliente.agregarPedido(pedido);
+
+    // Buscar pedido
+    Pedido? encontrado = buscarPedido(cliente.pedidos, "Producto X");
+    if (encontrado != null) {
+      print("Pedido encontrado: ${encontrado.producto}");
+    } else {
+      print("Pedido no encontrado");
+    }
+
+    // Simular carga de pedido
+    print("\nCargando pedido...");
+    Pedido pedidoCargado = await cargarPedido();
+    print("Pedido cargado: ${pedidoCargado.producto}");
+
+    // Seguimiento de estado
+    print("\nSeguimiento del pedido:");
+    await for (EstadoPedido estado in seguimientoPedido()) {
+      print("Estado: $estado");
+    }
+
+    // Entrega
+    repartidor.entregarPedido(pedido);
+
+  } on Exception catch (e) {
+    print("Oops... Hay una excepción: $e");
   } catch (e) {
-    print("error al cargar el pedido: $e");
+    print("Error al procesar el pedido: $e");
+  } finally {
+    print("\nProceso finalizado");
   }
 }
